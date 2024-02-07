@@ -67,12 +67,6 @@ function loadsFirstPageOfGallery(e) {
       lightbox.refresh();
 
       if (r.hits.length === 40) moreButtonRef.hidden = false;
-      
-      const lastAddedImage = galleryRef.lastElementChild;
-      lastAddedImage.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
     })
     .catch(err => console.log(err))
     .finally(() => {
@@ -85,7 +79,6 @@ function loadsFirstPageOfGallery(e) {
 function loadsOtherGalleryPages(e) {
   e.preventDefault();
 
-  moreButtonRef.hidden = true;
   loaderRef.hidden = false;
 
   fetchImages(page, searchValue)
@@ -102,15 +95,16 @@ function loadsOtherGalleryPages(e) {
       if (r.hits.length === 40) moreButtonRef.hidden = false;
       if (r.hits.length < 40) {
         moreButtonRef.hidden = false;
-        moreButtonRef.disabled = true;
-
         moreButtonRef.textContent = 'Images are over';
+        moreButtonRef.disabled = true;
       }
 
       const lastAddedImage = galleryRef.lastElementChild;
-      lastAddedImage.scrollIntoView({
+      const galleryRowHeight = lastAddedImage.clientHeight + 16; 
+      const yOffset = galleryRowHeight * 3; 
+      window.scrollBy({
+        top: yOffset,
         behavior: 'smooth',
-        block: 'end',
       });
     })
     .catch(err => console.log(err))
