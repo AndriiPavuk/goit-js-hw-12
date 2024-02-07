@@ -98,14 +98,11 @@ function loadsOtherGalleryPages(e) {
         moreButtonRef.textContent = 'Images are over';
       }
 
-  
       const newImagesHeight =
         galleryRef.lastElementChild.getBoundingClientRect().height;
 
+      const additionalHeight = 30;
 
-      const additionalHeight = 90;
-
-  
       window.scrollBy({
         top: newImagesHeight * 3 + additionalHeight,
         behavior: 'smooth',
