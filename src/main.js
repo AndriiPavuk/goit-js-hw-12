@@ -23,6 +23,7 @@ const lightbox = new SimpleLightbox('.gallery a', {
 
 let searchValue = '';
 let page = 0;
+let initialLoad = true;
 
 function loadsFirstPageOfGallery(e) {
   e.preventDefault();
@@ -38,7 +39,6 @@ function loadsFirstPageOfGallery(e) {
 
   searchValue = e.currentTarget.elements.query.value;
   page = 1;
-  moreButtonRef.textContent = 'More';
   moreButtonRef.hidden = true;
   loaderRef.hidden = false;
   galleryRef.innerHTML = '';
@@ -79,31 +79,35 @@ function loadsFirstPageOfGallery(e) {
 function loadsOtherGalleryPages(e) {
   e.preventDefault();
 
+  moreButtonRef.hidden = true;
   loaderRef.hidden = false;
 
   fetchImages(page, searchValue)
     .then(r => {
       page += 1;
 
-      galleryRef.insertAdjacentHTML(
-        'beforeend',
-        createsStringOfPageElements(r.hits)
-      );
+      const newImagesHtml = createsStringOfPageElements(r.hits);
+      galleryRef.insertAdjacentHTML('beforeend', newImagesHtml);
 
       lightbox.refresh();
 
       if (r.hits.length === 40) moreButtonRef.hidden = false;
       if (r.hits.length < 40) {
         moreButtonRef.hidden = false;
-        moreButtonRef.textContent = 'Images are over';
         moreButtonRef.disabled = true;
+        moreButtonRef.textContent = 'Images are over';
       }
 
-      const lastAddedImage = galleryRef.lastElementChild;
-      const galleryRowHeight = lastAddedImage.clientHeight + 16; 
-      const yOffset = galleryRowHeight * 3; 
+      // Получаем высоту новых изображений
+      const newImagesHeight =
+        galleryRef.lastElementChild.getBoundingClientRect().height;
+
+      // Дополнительная величина для скрытия предыдущего ряда
+      const additionalHeight = 100;
+
+      // Плавная прокрутка к новым изображениям
       window.scrollBy({
-        top: yOffset,
+        top: newImagesHeight * 3 + additionalHeight,
         behavior: 'smooth',
       });
     })
