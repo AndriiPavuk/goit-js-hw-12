@@ -38,7 +38,6 @@ function loadsFirstPageOfGallery(e) {
 
   searchValue = e.currentTarget.elements.query.value;
   page = 1;
-  moreButtonRef.disabled = false;
   moreButtonRef.textContent = 'More';
   moreButtonRef.hidden = true;
   loaderRef.hidden = false;
@@ -68,12 +67,11 @@ function loadsFirstPageOfGallery(e) {
       lightbox.refresh();
 
       if (r.hits.length === 40) moreButtonRef.hidden = false;
-
-      // Плавно прокручиваем к новым изображениям
+      
       const lastAddedImage = galleryRef.lastElementChild;
       lastAddedImage.scrollIntoView({
         behavior: 'smooth',
-        block: 'start',
+        block: 'end',
       });
     })
     .catch(err => console.log(err))
@@ -109,11 +107,10 @@ function loadsOtherGalleryPages(e) {
         moreButtonRef.textContent = 'Images are over';
       }
 
-      // Плавно прокручиваем к новым изображениям
       const lastAddedImage = galleryRef.lastElementChild;
       lastAddedImage.scrollIntoView({
         behavior: 'smooth',
-        block: 'start',
+        block: 'end',
       });
     })
     .catch(err => console.log(err))
