@@ -101,7 +101,7 @@ function loadsOtherGalleryPages(e) {
       const newImagesHeight =
         galleryRef.lastElementChild.getBoundingClientRect().height;
 
-      const additionalHeight = 30;
+      const additionalHeight = 10;
 
       window.scrollBy({
         top: newImagesHeight * 3 + additionalHeight,
