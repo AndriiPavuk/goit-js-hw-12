@@ -6,8 +6,14 @@ import fetchImages from './js/fetch.js';
 import createsStringOfPageElements from './js/template-page.js';
 
 const galleryRef = document.querySelector('.gallery');
+const moreButtonRef = document.querySelector('.more');
 const formRef = document.querySelector('.form');
 const loaderRef = document.querySelector('.loader');
+
+formRef.addEventListener('submit', loadsFirstPageOfGallery);
+moreButtonRef.addEventListener('click', loadsOtherGalleryPages);
+
+loaderRef.hidden = true;
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captions: true,
@@ -15,67 +21,103 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
-formRef.addEventListener('submit', loadFirstPageOfGallery);
+let searchValue = '';
+let page = 0;
 
-loaderRef.hidden = true;
-formRef.dataset.page = '1';
-
-function loadFirstPageOfGallery(e) {
+function loadsFirstPageOfGallery(e) {
   e.preventDefault();
-  const searchValue = e.currentTarget.elements.query.value.trim();
-
-  if (searchValue === '') {
-    showErrorMessage('Enter anything in the search field!');
+  if (e.currentTarget.elements.query.value.trim() === '') {
+    iziToast.error({
+      position: 'topRight',
+      messageColor: 'brown',
+      message: 'Enter anything in the search field!',
+      timeout: 3000,
+    });
     return;
   }
 
-  resetGallery();
-}
-
-function resetGallery() {
+  searchValue = e.currentTarget.elements.query.value;
+  page = 1;
+  moreButtonRef.disabled = false;
+  moreButtonRef.textContent = 'More';
+  moreButtonRef.hidden = true;
   loaderRef.hidden = false;
   galleryRef.innerHTML = '';
-  formRef.dataset.page = '1';
-  fetchAndDisplayImages();
-}
 
-function showErrorMessage(message) {
-  iziToast.error({
-    position: 'topRight',
-    messageColor: 'brown',
-    message,
-    timeout: 3000,
-  });
-}
+  fetchImages(page, searchValue)
+    .then(r => {
+      if (r.hits.length === 0) {
+        iziToast.error({
+          position: 'topRight',
+          messageColor: 'brown',
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+          timeout: 3000,
+        });
 
-function fetchAndDisplayImages() {
-  const currentPage = parseInt(formRef.dataset.page, 10);
+        return;
+      }
 
-  fetchImages(currentPage, formRef.elements.query.value.trim())
-    .then(response => {
-      handleImageResponse(response);
+      page += 1;
+
+      galleryRef.insertAdjacentHTML(
+        'beforeend',
+        createsStringOfPageElements(r.hits)
+      );
+
+      lightbox.refresh();
+
+      if (r.hits.length === 40) moreButtonRef.hidden = false;
+
+      // Плавно прокручиваем к новым изображениям
+      const lastAddedImage = galleryRef.lastElementChild;
+      lastAddedImage.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     })
-    .catch(error => console.error(error))
+    .catch(err => console.log(err))
     .finally(() => {
       loaderRef.hidden = true;
     });
-}
 
-function handleImageResponse(response) {
-  if (response.hits.length === 0) {
-    showErrorMessage(
-      'Sorry, there are no images matching your search query. Please try again!'
-    );
-    return;
-  }
-
-  galleryRef.insertAdjacentHTML(
-    'beforeend',
-    createsStringOfPageElements(response.hits)
-  );
-  lightbox.refresh();
-}
-
-function resetForm() {
   formRef.reset();
+}
+
+function loadsOtherGalleryPages(e) {
+  e.preventDefault();
+
+  moreButtonRef.hidden = true;
+  loaderRef.hidden = false;
+
+  fetchImages(page, searchValue)
+    .then(r => {
+      page += 1;
+
+      galleryRef.insertAdjacentHTML(
+        'beforeend',
+        createsStringOfPageElements(r.hits)
+      );
+
+      lightbox.refresh();
+
+      if (r.hits.length === 40) moreButtonRef.hidden = false;
+      if (r.hits.length < 40) {
+        moreButtonRef.hidden = false;
+        moreButtonRef.disabled = true;
+
+        moreButtonRef.textContent = 'Images are over';
+      }
+
+      // Плавно прокручиваем к новым изображениям
+      const lastAddedImage = galleryRef.lastElementChild;
+      lastAddedImage.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    })
+    .catch(err => console.log(err))
+    .finally(() => {
+      loaderRef.hidden = true;
+    });
 }
