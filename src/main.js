@@ -98,14 +98,14 @@ function loadsOtherGalleryPages(e) {
         moreButtonRef.textContent = 'Images are over';
       }
 
-      // Получаем высоту новых изображений
+  
       const newImagesHeight =
         galleryRef.lastElementChild.getBoundingClientRect().height;
 
-      // Дополнительная величина для скрытия предыдущего ряда
+
       const additionalHeight = 90;
 
-      // Плавная прокрутка к новым изображениям
+  
       window.scrollBy({
         top: newImagesHeight * 3 + additionalHeight,
         behavior: 'smooth',
