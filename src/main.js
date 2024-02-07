@@ -103,7 +103,7 @@ function loadsOtherGalleryPages(e) {
         galleryRef.lastElementChild.getBoundingClientRect().height;
 
       // Дополнительная величина для скрытия предыдущего ряда
-      const additionalHeight = 100;
+      const additionalHeight = 90;
 
       // Плавная прокрутка к новым изображениям
       window.scrollBy({
